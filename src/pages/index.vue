@@ -100,7 +100,7 @@ const processedVideos = computed(() =>
   videos.value.map((v) => processVideo(v, events)).sort(sortVideo)
 );
 
-const selected = ref<any>({});
+const selected = ref<any>(false);
 const chat = ref<any>([]);
 
 const onSelect = (index: number) => {
@@ -134,71 +134,87 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div style="display: grid; grid-template-columns: 300px 800px; gap: 48px">
-    <div style="position: sticky; top: 0">
-      <div v-for="(video, i) in processedVideos.slice(0, PAGE)">
-        <video
-          style="width: 300px; aspect-ratio: 16 / 9"
-          :src="video.value.data.videoUrl"
-          controls
-        />
-        <pre>
+  <div
+    v-show="!selected"
+    style="display: grid; grid-template-columns: 1fr 1fr 1fr"
+  >
+    <div
+      v-for="(video, i) in processedVideos.slice(0, PAGE)"
+      @click="onSelect(i)"
+      class="card"
+    >
+      <video
+        style="width: 100%; aspect-ratio: 16 / 9"
+        :src="video.value.data.videoUrl"
+        controls
+      />
+      <pre>
 Key      : {{ video.value.data.key }}
 Start    : {{ formatDatetime(video.value.data.startDatetime) }}
 End      : {{ formatDatetime(video.value.data.endDatetime) }}
 Uploaded : {{ formatDatetime(video.value.data.uploadDatetime) }}
 Duration : {{ formatDuration(video.value.duration) }}
     </pre
-        >
-        <h3
-          style="cursor: pointer"
-          v-if="video.value.data.event"
-          @click="onSelect(i)"
-        >
-          {{ video.value.data.event?.title }}
-        </h3>
-        <pre v-if="video.value.data.event">
+      >
+      <h3 style="cursor: pointer" v-if="video.value.data.event">
+        {{ video.value.data.event?.title }}
+      </h3>
+      <pre v-if="video.value.data.event">
 Start    : {{ formatDatetime(new Date(video.value.data.event.start_at)) }}
 End      : {{ formatDatetime(new Date(video.value.data.event.end_at)) }}
 Slug     : {{ video.value.data.event?.slug }}
     </pre
-        >
-      </div>
+      >
     </div>
-    <div v-if="selected">
-      <video
-        ref="video"
-        style="width: 100%; aspect-ratio: 16 / 9"
-        :src="selected.value?.data?.videoUrl"
-        controls
+  </div>
+  <div v-show="selected">
+    <pre @click="selected = false" style="cursor: pointer">Back</pre>
+    <video
+      ref="video"
+      style="width: 100%; aspect-ratio: 16 / 9"
+      :src="selected.value?.data?.videoUrl"
+      controls
+    />
+    <pre>{{ absoluteTimestamp }}</pre>
+    <pre>{{ timestamp }}</pre>
+    <div style="background: #111; position: relative; height: 32px">
+      <div
+        :style="{
+          background: 'orange',
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: 0,
+          width: (timestamp * 100) / selected.value?.duration + '%',
+        }"
       />
-      <pre>{{ absoluteTimestamp }}</pre>
-      <pre>{{ timestamp }}</pre>
-      <div style="background: #111; position: relative; height: 32px">
-        <div
-          :style="{
-            background: 'orange',
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            left: 0,
-            width: (timestamp * 100) / selected.value?.duration + '%',
-          }"
-        />
-      </div>
-      <br />
-      <div style="display: flex; overflow: scroll; width: 800px; gap: 16px">
-        <div v-for="c in chat" style="width: 150px">
-          <div style="margin-bottom: 8px">
-            <code>
-              {{ formatDatetime(new Date(c.datetime)) }} / {{ c.userName }}
-            </code>
-          </div>
-          <div style="margin-bottom: 10px">{{ c.value }}</div>
+    </div>
+    <br />
+    <div style="display: flex; overflow: scroll; width: 800px; gap: 16px">
+      <div v-for="c in chat" style="width: 150px" class="chat">
+        <div style="margin-bottom: 8px">
+          <code>
+            {{ formatDatetime(new Date(c.datetime)) }} / {{ c.userName }}
+          </code>
         </div>
+        <div style="margin-bottom: 10px">{{ c.value }}</div>
       </div>
     </div>
   </div>
 </template>
 
-100 - duration x - current
+<style scoped>
+.card {
+  padding: 16px;
+}
+.card:hover {
+  background: #222;
+  cursor: pointer;
+}
+.chat {
+  opacity: 0.5;
+}
+.chat:hover {
+  opacity: 1;
+}
+</style>
