@@ -5,8 +5,8 @@ import { scaleTime, scaleLinear } from "d3-scale";
 import { extent } from "d3-array";
 import { add } from "date-fns";
 
-const props = defineProps(["data", "timestamp", "start"]);
-watchEffect(() => console.log(props.data));
+const props = defineProps(["data", "timestamp", "start", "sel"]);
+watchEffect(() => console.log(props.sel));
 
 //const data = [];
 // const data = [
@@ -56,19 +56,15 @@ const y = (dd) =>
 </script>
 
 <template>
-  <!-- <div v-for="c in data">
-    <pre>{{ new Date().toISOString() }}</pre>
-    <pre>{{ c.datetime }}</pre>
-  </div> -->
   <svg :width="width" :height="height">
     <line
-      v-for="c in data"
+      v-for="(c, i) in data"
       :x1="x(data)(new Date(c.datetime))"
       :y1="height - y(data)(c.value.length)"
       :x2="x(data)(new Date(c.datetime))"
       :y2="height"
-      stroke="blue"
-      stroke-width="2"
+      :stroke="sel && sel === i ? 'white' : 'blue'"
+      stroke-width="3"
       fill="none"
     />
     <line
@@ -77,7 +73,7 @@ const y = (dd) =>
       :x2="x(data)(new Date(timestamp))"
       :y2="height"
       stroke="red"
-      stroke-width="4"
+      stroke-width="3"
       opacity="0.5"
       fill="none"
     />
