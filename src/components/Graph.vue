@@ -30,6 +30,11 @@ const x = (dd) =>
     .domain(extent(dd, (d) => new Date(d.datetime)))
     .range([p, width - p]);
 
+const y = (dd) =>
+  scaleLinear()
+    .domain(extent(dd, (d) => d.value.length))
+    .range([p, height - p]);
+
 // const y = computed(() =>
 //   scaleLinear()
 //     .domain(yDomain.value)
@@ -51,11 +56,16 @@ const x = (dd) =>
 </script>
 
 <template>
+  <!-- <div v-for="c in data">
+    <pre>{{ new Date().toISOString() }}</pre>
+    <pre>{{ c.datetime }}</pre>
+  </div> -->
+  {{ timestamp }}
   <svg :width="width" :height="height">
     <line
       v-for="c in data"
       :x1="x(data)(new Date(c.datetime))"
-      :y1="0"
+      :y1="height - y(data)(c.value.length)"
       :x2="x(data)(new Date(c.datetime))"
       :y2="height"
       stroke="blue"
@@ -75,5 +85,5 @@ const x = (dd) =>
   </svg>
   <!-- {{ new Date(timestamp) }} -->
   <br />
-  {{ start }}
+  {{ y(data)(data[0].value.length) }}
 </template>
