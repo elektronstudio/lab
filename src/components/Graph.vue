@@ -65,6 +65,7 @@ const y = (dd) =>
       :y2="height"
       :stroke="sel && sel === i ? 'white' : 'blue'"
       stroke-width="3"
+      opacity="0.5"
       fill="none"
     />
     <line
