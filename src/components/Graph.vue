@@ -18,7 +18,7 @@ watchEffect(() => console.log(props.data));
 //   { value: 21, userId: "ffa", datetime: add(new Date(), { seconds: 40 }) },
 // ];
 
-const width = 500;
+const width = 800;
 const height = 100;
 const p = 5;
 
@@ -60,7 +60,6 @@ const y = (dd) =>
     <pre>{{ new Date().toISOString() }}</pre>
     <pre>{{ c.datetime }}</pre>
   </div> -->
-  {{ timestamp }}
   <svg :width="width" :height="height">
     <line
       v-for="c in data"
@@ -72,18 +71,17 @@ const y = (dd) =>
       stroke-width="2"
       fill="none"
     />
-    <!-- <line
-      :x1="x(data)(timestamp)"
+    <line
+      :x1="x(data)(new Date(timestamp))"
       :y1="0"
-      :x2="x(data)(timestamp)"
+      :x2="x(data)(new Date(timestamp))"
       :y2="height"
       stroke="red"
       stroke-width="4"
       opacity="0.5"
       fill="none"
-    /> -->
+    />
   </svg>
   <!-- {{ new Date(timestamp) }} -->
   <br />
-  {{ y(data)(data[0].value.length) }}
 </template>

@@ -178,8 +178,8 @@ Slug     : {{ video.value.data.event?.slug }}
     />
     <pre>{{ absoluteTimestamp }}</pre>
     <pre>{{ timestamp }}</pre>
-    <p />
-    <Graph :data="chat" :timestamp="absoluteTimestamp" />
+    <br />
+    <Graph :data="chat" :timestamp="absoluteTimestamp?.toISOString()" />
     <!-- <div style="background: #111; position: relative; height: 32px">
       <div
         :style="{
