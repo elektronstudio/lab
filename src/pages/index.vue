@@ -9,6 +9,7 @@ import {
   differenceInSeconds,
   add,
 } from "date-fns";
+import Graph from "../components/Graph.vue";
 
 const PAGE = 1000000000;
 
@@ -132,6 +133,8 @@ onMounted(() => {
     });
   }
 });
+
+const sel = ref(0);
 </script>
 <template>
   <div
@@ -177,7 +180,13 @@ Slug     : {{ video.value.data.event?.slug }}
     />
     <pre>{{ absoluteTimestamp }}</pre>
     <pre>{{ timestamp }}</pre>
-    <div style="background: #111; position: relative; height: 32px">
+    <br />
+    <Graph
+      :data="chat"
+      :timestamp="absoluteTimestamp?.toISOString()"
+      :sel="sel"
+    />
+    <!-- <div style="background: #111; position: relative; height: 32px">
       <div
         :style="{
           background: 'orange',
@@ -188,10 +197,15 @@ Slug     : {{ video.value.data.event?.slug }}
           width: (timestamp * 100) / selected.value?.duration + '%',
         }"
       />
-    </div>
+    </div> -->
     <br />
     <div style="display: flex; overflow: scroll; width: 800px; gap: 16px">
-      <div v-for="c in chat" style="width: 150px" class="chat">
+      <div
+        v-for="(c, i) in chat"
+        style="width: 150px"
+        class="chat"
+        @click="sel = i"
+      >
         <div style="margin-bottom: 8px">
           <code>
             {{ formatDatetime(new Date(c.datetime)) }} / {{ c.userName }}
