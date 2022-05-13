@@ -1,15 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { useFetch } from "@vueuse/core";
-import {
-  sub,
-  compareDesc,
-  format,
-  differenceInMinutes,
-  differenceInSeconds,
-  add,
-} from "date-fns";
+import { sub, compareDesc, format, differenceInMinutes, add } from "date-fns";
 import Graph from "../components/Graph.vue";
+import { data as sliderData } from "../data/data";
 
 const PAGE = 1000000000;
 
@@ -135,6 +128,8 @@ onMounted(() => {
 });
 
 const sel = ref(0);
+
+const user = "gaitzbxocvshrdly";
 </script>
 <template>
   <div
@@ -183,6 +178,7 @@ Slug     : {{ video.value.data.event?.slug }}
     <br />
     <Graph
       :data="chat"
+      :data2="sliderData.filter((d) => d.userId === user)"
       :timestamp="absoluteTimestamp?.toISOString()"
       :sel="sel"
     />
