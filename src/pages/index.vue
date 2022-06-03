@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import { sub, compareDesc, format, differenceInMinutes, add } from "date-fns";
 import Graph from "../components/Graph.vue";
+import Graph2 from "../components/Graph2.vue";
 import { data as sliderData } from "../data/data";
 
 const PAGE = 1000000000;
@@ -129,7 +130,7 @@ onMounted(() => {
 
 const sel = ref(0);
 
-const user = "gaitzbxocvshrdly";
+//const user = "gaitzbxocvshrdly";
 </script>
 <template>
   <div
@@ -176,9 +177,8 @@ Slug     : {{ video.value.data.event?.slug }}
     <pre>{{ absoluteTimestamp }}</pre>
     <pre>{{ timestamp }}</pre>
     <br />
-    <Graph
-      :data="chat"
-      :data2="sliderData.filter((d) => d.userId === user)"
+    <Graph2
+      :data="sliderData"
       :timestamp="absoluteTimestamp?.toISOString()"
       :sel="sel"
     />
