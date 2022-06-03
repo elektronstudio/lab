@@ -3,7 +3,8 @@ import { computed, onMounted, ref } from "vue";
 import { sub, compareDesc, format, differenceInMinutes, add } from "date-fns";
 import Graph from "../components/Graph.vue";
 import Graph2 from "../components/Graph2.vue";
-import { data as sliderData } from "../data/data";
+//import { data as sliderData } from "../data/data";
+import { csvParse } from "d3-dsv";
 
 const PAGE = 1000000000;
 
@@ -129,7 +130,8 @@ onMounted(() => {
 });
 
 const sel = ref(0);
-
+const csv = ref("");
+const sliderData = computed(() => csvParse(csv.value));
 //const user = "gaitzbxocvshrdly";
 </script>
 <template>
@@ -170,7 +172,7 @@ Slug     : {{ video.value.data.event?.slug }}
     <pre @click="selected = false" style="cursor: pointer">Back</pre>
     <video
       ref="video"
-      style="width: 100%; aspect-ratio: 16 / 9"
+      style="width: 50%; aspect-ratio: 16 / 9"
       :src="selected.value?.data?.videoUrl"
       controls
     />
@@ -181,6 +183,19 @@ Slug     : {{ video.value.data.event?.slug }}
       :data="sliderData"
       :timestamp="absoluteTimestamp?.toISOString()"
       :sel="sel"
+    />
+    <p />
+    <textarea
+      placeholder="Paste CVS data here"
+      v-model="csv"
+      style="
+        color: white;
+        background: black;
+        border: 1px solid black;
+        padding: 8px;
+        width: 100%;
+        height: 33vw;
+      "
     />
     <!-- <div style="background: #111; position: relative; height: 32px">
       <div
