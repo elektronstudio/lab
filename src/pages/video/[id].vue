@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { sub, compareDesc, format, differenceInMinutes, add } from "date-fns";
-import { processedVideos } from "../state";
+import Graph from "../../components/Graph.vue";
+import Graph2 from "../../components/Graph2.vue";
+//import { data as sliderData } from "../data/data";
 import { csvParse } from "d3-dsv";
+import { useRoute } from "vue-router";
 
+import { processedVideos } from "../../state";
+
+/*
 const PAGE = 1000000000;
 
 const videoUrl = `https://ws.elektron.art/messages?secret=eestiteatriauhinnad&type=VIDEO`;
@@ -40,7 +46,6 @@ function getKey(key: string) {
 }
 
 function processVideo(video: any, events: any) {
-  const id = video.id;
   const path = video.value.path;
   const name = video.value.files[0].name;
   const key = getKey(video.value.original);
@@ -81,7 +86,6 @@ function processVideo(video: any, events: any) {
     uploadDatetime,
     key,
     event: getEvent(key, startDatetime),
-    id,
   };
   return video;
 }
@@ -92,25 +96,32 @@ function sortVideo(video: any, video2: any) {
   );
 }
 
-watch(videos, () => {
-  processedVideos.value = videos.value
-    .map((v) => processVideo(v, events))
-    .sort(sortVideo);
-});
+const processedVideos = computed(() =>
+  videos.value.map((v) => processVideo(v, events)).sort(sortVideo)
+);
 
-const selected = ref<any>(false);
+*/
+const route = useRoute();
+console.log(route.params.id);
+
+const selected = computed(
+  () => processedVideos.value.filter((v) => v.id == route.params.id)[0]
+);
+
 const chat = ref<any>([]);
 
-const onSelect = (index: number) => {
-  selected.value = processedVideos.value[index];
-  const chatUrl = `https://ws.elektron.art/messages?secret=eestiteatriauhinnad&channel=${selected.value.value.data.event?.slug}`;
-  fetch(chatUrl)
-    .then((r) => r.json())
-    .then((r) => (chat.value = r));
-};
+// const onSelect = (index: number) => {
+//   selected.value = processedVideos.value[index];
+//   const chatUrl = `https://ws.elektron.art/messages?secret=eestiteatriauhinnad&channel=${selected.value.value.data.event?.slug}`;
+//   fetch(chatUrl)
+//     .then((r) => r.json())
+//     .then((r) => (chat.value = r));
+// };
 
 const video = ref<any>(null);
+
 const timestamp = ref<any>(null);
+
 const absoluteTimestamp = computed(() => {
   if (selected.value?.value?.data) {
     return add(selected.value.value.data.startDatetime, {
@@ -137,50 +148,58 @@ const sliderData = computed(() => csvParse(csv.value));
 //const user = "gaitzbxocvshrdly";
 </script>
 <template>
-  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr">
+  <div>
     <RouterLink
-      v-for="(video, i) in processedVideos.slice(0, PAGE)"
-      @click="onSelect(i)"
-      class="card"
-      :to="'/video/' + video.id"
+      style="cursor: pointer; display: block; margin-bottom: 16px"
+      to="/"
     >
+      Back
+    </RouterLink>
+    <div v-if="selected">
       <video
-        style="width: 100%; aspect-ratio: 16 / 9"
-        :src="video.value.data.videoUrl"
+        ref="video"
+        style="width: 50%; aspect-ratio: 16 / 9"
+        :src="selected.value?.data?.videoUrl"
         controls
       />
-      <pre>
-Key      : {{ video.value.data.key }}
-Start    : {{ formatDatetime(video.value.data.startDatetime) }}
-End      : {{ formatDatetime(video.value.data.endDatetime) }}
-Uploaded : {{ formatDatetime(video.value.data.uploadDatetime) }}
-Duration : {{ formatDuration(video.value.duration) }}
-    </pre
-      >
-      <h3 style="cursor: pointer" v-if="video.value.data.event">
-        {{ video.value.data.event?.title }}
-      </h3>
-      <pre v-if="video.value.data.event">
-Start    : {{ formatDatetime(new Date(video.value.data.event.start_at)) }}
-End      : {{ formatDatetime(new Date(video.value.data.event.end_at)) }}
-Slug     : {{ video.value.data.event?.slug }}
-      </pre>
-    </RouterLink>
+      <pre>{{ absoluteTimestamp }}</pre>
+      <pre>{{ timestamp }}</pre>
+      <br />
+      <Graph2
+        :data="sliderData"
+        :timestamp="absoluteTimestamp?.toISOString()"
+        :sel="sel"
+      />
+      <p />
+      <textarea
+        placeholder="Paste CVS data here"
+        v-model="csv"
+        style="
+          color: white;
+          background: black;
+          border: 1px solid black;
+          padding: 8px;
+          width: 100%;
+          height: 33vw;
+        "
+      />
+
+      <br />
+      <div style="display: flex; overflow: scroll; width: 800px; gap: 16px">
+        <div
+          v-for="(c, i) in chat"
+          style="width: 150px"
+          class="chat"
+          @click="sel = i"
+        >
+          <div style="margin-bottom: 8px">
+            <code>
+              {{ formatDatetime(new Date(c.datetime)) }} / {{ c.userName }}
+            </code>
+          </div>
+          <div style="margin-bottom: 10px">{{ c.value }}</div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
-
-<style scoped>
-.card {
-  padding: 16px;
-}
-.card:hover {
-  background: #222;
-  cursor: pointer;
-}
-.chat {
-  opacity: 0.5;
-}
-.chat:hover {
-  opacity: 1;
-}
-</style>
