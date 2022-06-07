@@ -1,9 +1,5 @@
-<script setup lang="ts">
-import Index from "./pages/index.vue";
-</script>
-
 <template>
-  <Index />
+  <router-view />
 </template>
 
 <style>
@@ -15,5 +11,8 @@ body {
   background: black;
   margin: 0;
   padding: 32px;
+}
+a {
+  all: unset;
 }
 </style>
