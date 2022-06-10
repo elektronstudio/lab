@@ -1,106 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { sub, compareDesc, format, differenceInMinutes, add } from "date-fns";
 import Graph from "../../components/Graph.vue";
 import Graph2 from "../../components/Graph2.vue";
-//import { data as sliderData } from "../data/data";
+import { sliderData as savedSliderData } from "../../data/data";
 import { csvParse } from "d3-dsv";
 import { useRoute } from "vue-router";
 
 import { processedVideos } from "../../state";
 
-/*
-const PAGE = 1000000000;
+const unique = (arr: any[]) => [...new Set(arr)];
 
-const videoUrl = `https://ws.elektron.art/messages?secret=eestiteatriauhinnad&type=VIDEO`;
-const videos = ref([]);
-
-fetch(videoUrl)
-  .then((r) => r.json())
-  .then((r) => (videos.value = r));
-
-const eventsUrl = `https://strapi.elektron.art/events?_limit=-1`;
-const events = ref([]);
-
-fetch(eventsUrl)
-  .then((r) => r.json())
-  .then((r) => (events.value = r));
-
-function formatDuration(seconds: number) {
-  const hours = Math.floor(seconds / 3600);
-  seconds %= 3600;
-  const minutes = Math.floor(seconds / 60);
-  seconds = Math.floor(seconds % 60);
-  return `${hours}h ${minutes}m ${seconds}s`;
-}
-
-function formatDatetime(date: Date) {
-  return format(date, "dd.MM.yyyy HH:mm:ss");
-}
-
-function getKey(key: string) {
-  if (key === "x_live_1") {
-    return "elektron";
-  }
-  return key.split("_")[0];
-}
-
-function processVideo(video: any, events: any) {
-  const path = video.value.path;
-  const name = video.value.files[0].name;
-  const key = getKey(video.value.original);
-  const videoUrl = `https://pepe-dl.babahhcdn.com/bb1150/${path}/${name}`;
-  const lastModified = name.split(".")[0].split("_").slice(-1)[0];
-  const endDatetime = new Date(parseInt(lastModified) * 1000);
-  const startDatetime = sub(endDatetime, { seconds: video.value.duration });
-  const uploadDatetime = new Date(video.datetime);
-
-  const getEvent = (key: any, startDatetime: any) => {
-    return events.value
-      .map((e: any) => {
-        const diff = Math.abs(
-          differenceInMinutes(new Date(e.start_at), startDatetime)
-        );
-        const relativeDiff = differenceInMinutes(
-          startDatetime,
-          new Date(e.start_at)
-        );
-        const suffix =
-          relativeDiff <= -1
-            ? "min earlier"
-            : relativeDiff > 1
-            ? "min later"
-            : " on time";
-        return { ...e, diff, formattedDiff: Math.abs(relativeDiff) + suffix };
-      })
-      .filter((e: any) => e.diff < 120)[0];
-  };
-
-  video.value.data = {
-    path,
-    name,
-    videoUrl,
-    lastModified,
-    startDatetime,
-    endDatetime,
-    uploadDatetime,
-    key,
-    event: getEvent(key, startDatetime),
-  };
-  return video;
-}
-function sortVideo(video: any, video2: any) {
-  return compareDesc(
-    video.value.data.startDatetime,
-    video2.value.data.startDatetime
-  );
-}
-
-const processedVideos = computed(() =>
-  videos.value.map((v) => processVideo(v, events)).sort(sortVideo)
-);
-
-*/
 const route = useRoute();
 console.log(route.params.id);
 
@@ -144,8 +54,30 @@ onMounted(() => {
 
 const sel = ref(0);
 const csv = ref("");
-const sliderData = computed(() => csvParse(csv.value));
+const json = ref("");
+const sliderData = ref<any[]>([]);
+
+sliderData.value = savedSliderData;
+
+watch(csv, () => {
+  sliderData.value = csvParse(csv.value);
+});
+
+watch(json, () => {
+  sliderData.value = JSON.parse(json.value);
+});
 //const user = "gaitzbxocvshrdly";
+
+const userId = ref(null);
+
+const userIds = computed(() => unique(sliderData.value.map((c) => c.userId)));
+const usersSliderData = computed(() => {
+  return userIds.value.map((userId: string) =>
+    sliderData.value.filter((d) => d.userId === userId)
+  );
+});
+
+console.log(selected.value);
 </script>
 <template>
   <div>
@@ -163,13 +95,17 @@ const sliderData = computed(() => csvParse(csv.value));
         controls
       />
       <pre>{{ absoluteTimestamp }}</pre>
-      <pre>{{ timestamp }}</pre>
       <br />
-      <Graph2
-        :data="sliderData"
-        :timestamp="absoluteTimestamp?.toISOString()"
-        :sel="sel"
-      />
+      <div style="position: relative; height: 100px">
+        <Graph2
+          v-for="userSliderData in usersSliderData"
+          :data="userSliderData"
+          :timestamp="absoluteTimestamp?.toISOString()"
+          :start="selected.value.data.startDatetime"
+          :end="selected.value.data.endDatetime"
+          style="position: absolute; top: 0; right: 0; bottom: 0; left: 0"
+        />
+      </div>
       <p />
       <textarea
         placeholder="Paste CVS data here"
@@ -180,26 +116,21 @@ const sliderData = computed(() => csvParse(csv.value));
           border: 1px solid black;
           padding: 8px;
           width: 100%;
-          height: 33vw;
+          height: 20vw;
         "
       />
-
-      <br />
-      <div style="display: flex; overflow: scroll; width: 800px; gap: 16px">
-        <div
-          v-for="(c, i) in chat"
-          style="width: 150px"
-          class="chat"
-          @click="sel = i"
-        >
-          <div style="margin-bottom: 8px">
-            <code>
-              {{ formatDatetime(new Date(c.datetime)) }} / {{ c.userName }}
-            </code>
-          </div>
-          <div style="margin-bottom: 10px">{{ c.value }}</div>
-        </div>
-      </div>
+      <textarea
+        placeholder="OR paste JSON data here"
+        v-model="json"
+        style="
+          color: white;
+          background: black;
+          border: 1px solid black;
+          padding: 8px;
+          width: 100%;
+          height: 20vw;
+        "
+      />
     </div>
   </div>
 </template>
