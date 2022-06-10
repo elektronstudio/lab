@@ -52,12 +52,11 @@ onMounted(() => {
   }
 });
 
-const sel = ref(0);
 const csv = ref("");
 const json = ref("");
 const sliderData = ref<any[]>([]);
 
-sliderData.value = savedSliderData;
+// sliderData.value = savedSliderData;
 
 watch(csv, () => {
   sliderData.value = csvParse(csv.value);

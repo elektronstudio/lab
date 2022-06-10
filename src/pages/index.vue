@@ -95,7 +95,8 @@ function sortVideo(video: any, video2: any) {
 watch(videos, () => {
   processedVideos.value = videos.value
     .map((v) => processVideo(v, events))
-    .sort(sortVideo);
+    .sort(sortVideo)
+    .slice(0, 12);
 });
 
 const selected = ref<any>(false);
