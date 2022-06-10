@@ -37,7 +37,7 @@ const y = (dd) =>
           ])
         )
       "
-      stroke="yellow"
+      stroke="rgba(50,150,255,0.5)"
       stroke-width="2"
       opacity="1"
       fill="none"
