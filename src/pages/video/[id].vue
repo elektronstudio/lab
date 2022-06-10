@@ -76,6 +76,8 @@ const usersSliderData = computed(() => {
     sliderData.value.filter((d) => d.userId === userId)
   );
 });
+
+console.log(selected.value);
 </script>
 <template>
   <div>
@@ -93,16 +95,14 @@ const usersSliderData = computed(() => {
         controls
       />
       <pre>{{ absoluteTimestamp }}</pre>
-      <pre>{{ timestamp }}</pre>
       <br />
-      <pre>{{ userIds }}</pre>
-      <br />
-      <div style="position: relative; border: 2px solid red; height: 100px">
+      <div style="position: relative; height: 100px">
         <Graph2
           v-for="userSliderData in usersSliderData"
           :data="userSliderData"
           :timestamp="absoluteTimestamp?.toISOString()"
-          :sel="sel"
+          :start="selected.value.data.startDatetime"
+          :end="selected.value.data.endDatetime"
           style="position: absolute; top: 0; right: 0; bottom: 0; left: 0"
         />
       </div>
@@ -131,22 +131,6 @@ const usersSliderData = computed(() => {
           height: 20vw;
         "
       />
-      <!-- <br />
-      <div style="display: flex; overflow: scroll; width: 800px; gap: 16px">
-        <div
-          v-for="(c, i) in chat"
-          style="width: 150px"
-          class="chat"
-          @click="sel = i"
-        >
-          <div style="margin-bottom: 8px">
-            <code>
-              {{ formatDatetime(new Date(c.datetime)) }} / {{ c.userName }}
-            </code>
-          </div>
-          <div style="margin-bottom: 10px">{{ c.value }}</div>
-        </div>
-      </div> -->
     </div>
   </div>
 </template>
